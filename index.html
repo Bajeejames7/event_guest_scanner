@@ -419,9 +419,11 @@
   async function loadGuests() {
     try {
       const res = await fetch(API + '/api/guests');
-      guests = await res.json();
+      const data = await res.json();
+      guests = Array.isArray(data) ? data : [];
     } catch (err) {
       console.error('Could not load guests', err);
+      guests = [];
     }
   }
 
