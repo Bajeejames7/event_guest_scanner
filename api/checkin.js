@@ -17,6 +17,8 @@ module.exports = async (req, res) => {
     if (token) {
       // Try signed token first, fall back to plain guest ID
       guestId = verifyToken(token) || token.trim();
+      console.log('RAW TOKEN:', JSON.stringify(token));
+      console.log('EXTRACTED ID:', guestId);
     } else if (code) {
       const { rows } = await client.query('SELECT id FROM guests WHERE code = $1', [code.toUpperCase()]);
       if (!rows.length) return res.status(404).json({ error: 'Code not found' });
