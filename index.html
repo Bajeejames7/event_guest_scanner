@@ -361,13 +361,12 @@
     }
 
     let html = '<table class="guest-table"><thead><tr>'
-      + '<th>Name</th><th class="col-id">Code</th><th>Type</th><th>Status</th><th class="col-time">Time</th><th>Action</th>'
+      + '<th>Name</th><th>Type</th><th>Status</th><th class="col-time">Time</th><th>Action</th>'
       + '</tr></thead><tbody>';
 
     filtered.forEach(g => {
       html += `<tr>
         <td>${esc(g.name)}</td>
-        <td class="col-id" style="color:#a78bfa;font-family:monospace;letter-spacing:1px">${esc(g.code || g.id)}</td>
         <td><span class="badge badge-${g.type}">${g.type.toUpperCase()}</span></td>
         <td><span class="badge ${g.arrived ? 'badge-arrived' : 'badge-pending'}">${g.arrived ? 'Arrived' : 'Pending'}</span></td>
         <td class="col-time" style="color:#6b7280;font-size:0.8rem">${formatTime(g.arrived_at)}</td>
