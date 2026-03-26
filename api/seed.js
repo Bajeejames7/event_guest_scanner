@@ -25,6 +25,7 @@ module.exports = async (req, res) => {
     `);
 
     const sample = [
+      ['g-116','James Bajee','vip'],
       ['g-001','Fuad Abdi','vip'],['g-002','Dr. Johnson Mwangi','vip'],
       ['g-003','Mrs. Florence Kinuthia','vip'],['g-004','Daniel Mwangi Kinuthia','vip'],
       ['g-005','Ruth Mwouria','vip'],['g-006','Shadrack Njoroge','vip'],

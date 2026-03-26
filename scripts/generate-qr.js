@@ -6,6 +6,7 @@ const path = require('path');
 const { guestCode, signToken } = require('../lib/tokens');
 
 const guests = [
+  { id: 'g-116', name: 'James Bajee' },
   { id: 'g-001', name: 'Fuad Abdi' },
   { id: 'g-002', name: 'Dr. Johnson Mwangi' },
   { id: 'g-003', name: 'Mrs. Florence Kinuthia' },

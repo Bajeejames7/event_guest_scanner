@@ -8,7 +8,10 @@ CREATE TABLE IF NOT EXISTS guests (
   arrived_at TIMESTAMP    DEFAULT NULL
 );
 
+-- Run CREATE TABLE first, then this INSERT block separately
+
 INSERT INTO guests (id, name, type) VALUES
+('g-116', 'James Bajee', 'vip'),
 ('g-001', 'Fuad Abdi', 'vip'),
 ('g-002', 'Dr. Johnson Mwangi', 'vip'),
 ('g-003', 'Mrs. Florence Kinuthia', 'vip'),
