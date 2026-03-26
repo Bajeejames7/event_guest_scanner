@@ -271,14 +271,61 @@
   function manualCheck() {
     const val = document.getElementById('manual-input').value.trim();
     if (!val) return;
-    checkIn(val);
+    // Manual check-in: show confirmation dialog first
+    const q = val.toLowerCase();
+    const match = guests.find(g =>
+      g.id.toLowerCase() === q || g.name.toLowerCase() === q || g.name.toLowerCase().includes(q)
+    );
+    if (!match) { showResult('Guest not found: ' + val, 'error'); return; }
+    showConfirm(match);
+  }
+
+  // ── Confirmation modal for manual check-in ─────────────────
+  function showConfirm(guest) {
+    const existing = document.getElementById('confirm-modal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'confirm-modal';
+    modal.style.cssText = `
+      position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;
+      align-items:center;justify-content:center;z-index:1000;animation:fadeIn 0.2s ease;
+    `;
+    modal.innerHTML = `
+      <div style="background:#1a1a2e;border:1px solid #3b3b6b;border-radius:16px;padding:28px;max-width:360px;width:90%;text-align:center;">
+        <div style="font-size:2rem;margin-bottom:10px;">⚠️</div>
+        <div style="color:#fcd34d;font-size:1rem;font-weight:700;margin-bottom:6px;">Manual Check-In</div>
+        <div style="color:#e0e0e0;font-size:1.1rem;font-weight:600;margin-bottom:4px;">${esc(guest.name)}</div>
+        <div style="color:#6b7280;font-size:0.85rem;margin-bottom:20px;">
+          ${guest.type === 'vip' ? '<span style="color:#c4b5fd">⭐ VIP</span>' : 'Regular'} &nbsp;|&nbsp; ID: ${esc(guest.id)}
+        </div>
+        <div style="color:#9ca3af;font-size:0.8rem;margin-bottom:20px;">
+          You are manually checking in this guest.<br>This action will be recorded with the current time.
+        </div>
+        <div style="display:flex;gap:10px;justify-content:center;">
+          <button onclick="document.getElementById('confirm-modal').remove();document.getElementById('manual-input').value='';"
+            style="padding:10px 22px;border-radius:8px;border:1px solid #3b3b6b;background:#1e1e3a;color:#a78bfa;font-weight:600;cursor:pointer;">
+            Cancel
+          </button>
+          <button onclick="confirmManualCheckIn('${esc(guest.id)}')"
+            style="padding:10px 22px;border-radius:8px;border:none;background:#d97706;color:#fff;font-weight:600;cursor:pointer;">
+            Confirm Check-In
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+
+  async function confirmManualCheckIn(id) {
+    document.getElementById('confirm-modal').remove();
     document.getElementById('manual-input').value = '';
+    await checkIn(id, true);
   }
 
   // ── Check-in logic ─────────────────────────────────────────
-  async function checkIn(query) {
+  async function checkIn(query, isManual = false) {
     if (!query) return;
-    // Try to resolve name → id from local cache
     const q = query.toLowerCase();
     const match = guests.find(g =>
       g.id.toLowerCase() === q || g.name.toLowerCase() === q || g.name.toLowerCase().includes(q)
@@ -289,22 +336,29 @@
       const res = await fetch(API + '/api/checkin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ id, manual: isManual }),
       });
       const data = await res.json();
       if (!res.ok) { showResult(data.error || 'Error', 'error'); return; }
 
       if (data.status === 'already_checked_in') {
-        showResult('Already checked in: ' + data.guest.name, 'warning');
+        showResult('⚠️ Already checked in: ' + data.guest.name + ' at ' + formatTime(data.guest.arrived_at), 'warning');
+      } else if (isManual) {
+        showResult('✓ Manual check-in: ' + data.guest.name + (data.guest.type === 'vip' ? ' ⭐ VIP' : ''), 'warning');
       } else {
-        showResult('Welcome, ' + data.guest.name + (data.guest.type === 'vip' ? ' ⭐ VIP' : '') + '!', 'success');
+        showResult('✓ Welcome, ' + data.guest.name + (data.guest.type === 'vip' ? ' ⭐ VIP' : '') + '!', 'success');
       }
-      // Refresh local cache
       await loadGuests();
       updateStats();
+      if (document.getElementById('view-guests').classList.contains('active')) renderGuests();
     } catch (err) {
       showResult('Network error', 'error');
     }
+  }
+
+  function formatTime(ts) {
+    if (!ts) return '—';
+    return new Date(ts).toLocaleTimeString();
   }
 
   function showResult(msg, type) {
@@ -347,8 +401,8 @@
         <td><span class="badge ${g.arrived ? 'badge-arrived' : 'badge-pending'}">${g.arrived ? 'Arrived' : 'Pending'}</span></td>
         <td style="color:#6b7280;font-size:0.8rem">${g.arrivedAt || '—'}</td>
         <td>${g.arrived
-          ? '<button class="btn-mark arrived">&#x2713; In</button>'
-          : `<button class="btn-mark pending" onclick="checkIn('${esc(g.id)}');renderGuests()">Check In</button>`
+          ? `<button class="btn-mark arrived">&#x2713; In</button><span style="font-size:0.75rem;color:#6b7280;margin-left:6px">${formatTime(g.arrived_at)}</span>`
+          : `<button class="btn-mark pending" onclick="showConfirm(guests.find(x=>x.id==='${esc(g.id)}'))">Check In</button>`
         }</td>
       </tr>`;
     });
