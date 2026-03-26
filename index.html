@@ -158,8 +158,7 @@
     <div id="reader"></div>
   </div>
   <div class="scanner-controls">
-    <button class="btn btn-primary" id="btn-start" onclick="startScanner()">Start Camera</button>
-    <button class="btn btn-danger"  id="btn-stop"  onclick="stopScanner()" style="display:none">Stop Camera</button>
+    <button class="btn btn-danger" id="btn-stop" onclick="stopScanner()" style="display:none">Stop Camera</button>
   </div>
   <div id="scan-result"></div>
   <div style="margin-top:24px;">
@@ -229,7 +228,6 @@
       () => {}
     ).then(() => {
       scanning = true;
-      document.getElementById('btn-start').style.display = 'none';
       document.getElementById('btn-stop').style.display = 'inline-block';
     }).catch(err => showResult('Camera error: ' + err, 'error'));
   }
@@ -238,7 +236,6 @@
     if (scanner && scanning) {
       scanner.stop().then(() => { scanner.clear(); scanning = false; });
     }
-    document.getElementById('btn-start').style.display = 'inline-block';
     document.getElementById('btn-stop').style.display = 'none';
   }
 
@@ -348,7 +345,7 @@
     const type   = document.getElementById('filter-type').value;
 
     let filtered = guests.filter(g => {
-      const matchSearch = g.name.toLowerCase().includes(search) || g.id.toLowerCase().includes(search);
+      const matchSearch = g.name.toLowerCase().includes(search);
       const matchStatus = status === 'all' || (status === 'arrived' ? g.arrived : !g.arrived);
       const matchType   = type === 'all' || g.type === type;
       return matchSearch && matchStatus && matchType;
@@ -405,7 +402,7 @@
 
   function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-  (async () => { await loadGuests(); updateStats(); })();
+  (async () => { await loadGuests(); updateStats(); startScanner(); })();
 </script>
 </body>
 </html>
