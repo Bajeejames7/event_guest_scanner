@@ -15,8 +15,12 @@ module.exports = async (req, res) => {
     let guestId = null;
 
     if (token) {
-      // Try signed token first, fall back to plain guest ID
-      guestId = verifyToken(token) || token.trim();
+      // Try signed token first, fall back to extracting just the ID part
+      guestId = verifyToken(token);
+      if (!guestId) {
+        // Token format is "id|signature" — extract just the id
+        guestId = token.includes('|') ? token.split('|')[0].trim() : token.trim();
+      }
       console.log('RAW TOKEN:', JSON.stringify(token));
       console.log('EXTRACTED ID:', guestId);
     } else if (code) {
