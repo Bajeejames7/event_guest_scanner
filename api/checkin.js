@@ -16,8 +16,11 @@ module.exports = async (req, res) => {
 
     if (token) {
       // QR scan — verify signed token
+      console.log('Received token:', token);
+      console.log('QR_SECRET:', process.env.QR_SECRET ? 'SET' : 'NOT SET');
       guestId = verifyToken(token);
-      if (!guestId) return res.status(401).json({ error: 'Invalid or forged QR code' });
+      console.log('Verified guestId:', guestId);
+      if (!guestId) return res.status(401).json({ error: 'Invalid or forged QR code', token });
     } else if (code) {
       // Manual code entry — look up by 7-char code
       const { rows } = await pool.query('SELECT id FROM guests WHERE code = $1', [code.toUpperCase()]);
