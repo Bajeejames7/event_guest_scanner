@@ -1,4 +1,5 @@
 const { getPool } = require('../lib/db');
+const { verifyToken, guestCode } = require('../lib/tokens');
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -7,12 +8,26 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { id } = req.body || {};
-  if (!id) return res.status(400).json({ error: 'Missing guest id' });
+  const { token, code, manual } = req.body || {};
 
   try {
     const pool = getPool();
-    const { rows } = await pool.query('SELECT * FROM guests WHERE id = $1', [id]);
+    let guestId = null;
+
+    if (token) {
+      // QR scan — verify signed token
+      guestId = verifyToken(token);
+      if (!guestId) return res.status(401).json({ error: 'Invalid or forged QR code' });
+    } else if (code) {
+      // Manual code entry — look up by 7-char code
+      const { rows } = await pool.query('SELECT id FROM guests WHERE code = $1', [code.toUpperCase()]);
+      if (!rows.length) return res.status(404).json({ error: 'Code not found' });
+      guestId = rows[0].id;
+    } else {
+      return res.status(400).json({ error: 'Provide token or code' });
+    }
+
+    const { rows } = await pool.query('SELECT * FROM guests WHERE id = $1', [guestId]);
     if (!rows.length) return res.status(404).json({ error: 'Guest not found' });
 
     const guest = rows[0];
@@ -22,7 +37,7 @@ module.exports = async (req, res) => {
 
     await pool.query(
       'UPDATE guests SET arrived = true, arrived_at = NOW() WHERE id = $1',
-      [id]
+      [guestId]
     );
     guest.arrived = true;
     guest.arrived_at = new Date();

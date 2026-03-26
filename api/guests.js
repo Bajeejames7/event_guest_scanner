@@ -7,7 +7,7 @@ module.exports = async (req, res) => {
   try {
     const pool = getPool();
     const { rows } = await pool.query(
-      'SELECT id, name, email, type, arrived, arrived_at FROM guests ORDER BY name'
+      'SELECT id, name, email, type, code, arrived, arrived_at FROM guests ORDER BY name'
     );
     res.status(200).json(rows);
   } catch (err) {

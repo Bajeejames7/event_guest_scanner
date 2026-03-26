@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS guests (
   name       VARCHAR(255) NOT NULL,
   email      VARCHAR(255),
   type       VARCHAR(10)  DEFAULT 'regular',
+  code       VARCHAR(7)   UNIQUE,
   arrived    BOOLEAN      DEFAULT false,
   arrived_at TIMESTAMP    DEFAULT NULL
 );

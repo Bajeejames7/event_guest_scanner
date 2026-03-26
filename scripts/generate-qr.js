@@ -1,7 +1,9 @@
 require('dotenv').config();
 const QRCode = require('qrcode');
+const Jimp = require('jimp');
 const fs = require('fs');
 const path = require('path');
+const { guestCode, signToken } = require('../lib/tokens');
 
 const guests = [
   { id: 'g-001', name: 'Fuad Abdi' },
@@ -124,15 +126,44 @@ const guests = [
 const outDir = path.join(__dirname, '../qr-codes');
 if (!fs.existsSync(outDir)) fs.mkdirSync(outDir);
 
+const QR_SIZE = 400;
+
 (async () => {
+  const font = await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK);
+  const fontSmall = await Jimp.loadFont(Jimp.FONT_SANS_16_BLACK);
+
   for (const guest of guests) {
-    const file = path.join(outDir, `${guest.id}_${guest.name.replace(/[^a-zA-Z0-9]/g, '_')}.png`);
-    await QRCode.toFile(file, guest.id, {
-      width: 400,
-      margin: 2,
+    const code = guestCode(guest.id);
+    const token = signToken(guest.id);
+    const safeName = guest.name.replace(/[^a-zA-Z0-9]/g, '_');
+    const file = path.join(outDir, `${guest.id}_${safeName}.png`);
+
+    // Generate QR as buffer
+    const qrBuffer = await QRCode.toBuffer(token, {
+      width: QR_SIZE, margin: 2,
       color: { dark: '#000000', light: '#ffffff' },
     });
-    console.log(`✓ ${guest.id} — ${guest.name}`);
+
+    // Load QR into Jimp
+    const qrImg = await Jimp.read(qrBuffer);
+
+    // Create white canvas with extra space for labels
+    const totalHeight = QR_SIZE + 90;
+    const canvas = new Jimp(QR_SIZE, totalHeight, 0xffffffff);
+    canvas.composite(qrImg, 0, 0);
+
+    // Print guest name (truncate if too long)
+    const displayName = guest.name.length > 28 ? guest.name.substring(0, 26) + '…' : guest.name;
+    const nameWidth = Jimp.measureText(fontSmall, displayName);
+    canvas.print(fontSmall, Math.max(0, (QR_SIZE - nameWidth) / 2), QR_SIZE + 8, displayName);
+
+    // Print 7-char code in large font
+    const codeWidth = Jimp.measureText(font, code);
+    canvas.print(font, Math.max(0, (QR_SIZE - codeWidth) / 2), QR_SIZE + 42, code);
+
+    await canvas.writeAsync(file);
+    console.log(`✓ ${guest.id} — ${guest.name}  [${code}]`);
   }
+
   console.log(`\nDone. ${guests.length} QR codes saved to /qr-codes/`);
 })();
