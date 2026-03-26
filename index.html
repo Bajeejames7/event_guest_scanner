@@ -7,163 +7,149 @@
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     :root {
-      --bg:        #0f0f1a;
-      --bg2:       #1a1a2e;
-      --bg3:       #16213e;
-      --border:    #2a2a4a;
-      --border2:   #1e1e3a;
-      --text:      #e0e0e0;
-      --text2:     #9ca3af;
-      --text3:     #6b7280;
-      --accent:    #c0392b;
-      --accent2:   #e67e22;
-      --accent3:   #f39c12;
-      --purple:    #a78bfa;
-      --purpledark:#7c3aed;
+      --bg-from: #0f0f1a;
+      --bg-to:   #16213e;
+      --glass:   rgba(255,255,255,0.05);
+      --glass-b: rgba(167,139,250,0.18);
+      --glass-h: rgba(255,255,255,0.09);
+      --accent:  #a78bfa;
+      --accent2: #7c3aed;
+      --text:    #e0e0e0;
+      --text2:   #9ca3af;
+      --text3:   #6b7280;
     }
     body.light {
-      --bg:        #fdf6ec;
-      --bg2:       #fff8f0;
-      --bg3:       #fdebd0;
-      --border:    #e8c99a;
-      --border2:   #f0dbb5;
-      --text:      #2c1810;
-      --text2:     #5d4037;
-      --text3:     #8d6e63;
-      --accent:    #c0392b;
-      --accent2:   #e67e22;
-      --accent3:   #f39c12;
-      --purple:    #7c3aed;
-      --purpledark:#6d28d9;
+      --bg-from: #e8e8f8;
+      --bg-to:   #c8d4f0;
+      --glass:   rgba(255,255,255,0.5);
+      --glass-b: rgba(124,58,237,0.22);
+      --glass-h: rgba(255,255,255,0.7);
+      --accent:  #7c3aed;
+      --accent2: #6d28d9;
+      --text:    #1e1b4b;
+      --text2:   #4c1d95;
+      --text3:   #6b7280;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: var(--bg); color: var(--text);
-      min-height: 100vh; min-width: 375px;
-      transition: background 0.3s, color 0.3s;
+      background: linear-gradient(135deg, var(--bg-from) 0%, var(--bg-to) 100%);
+      background-attachment: fixed;
+      color: var(--text); min-height: 100vh; min-width: 375px;
+      transition: all 0.3s;
     }
 
     header {
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 50%, var(--accent3) 100%);
+      background: rgba(124,58,237,0.18);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--glass-b);
       padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 3px solid var(--accent3);
-      position: relative;
-    }
-    header::after {
-      content: '◆ ◆ ◆';
-      position: absolute;
-      bottom: -1px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 0.5rem;
-      color: var(--accent3);
-      letter-spacing: 6px;
+      display: flex; align-items: center; justify-content: space-between;
     }
     .header-left { display: flex; align-items: center; gap: 12px; }
+    .header-title .org { font-size: 0.68rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; }
     .header-title h1 {
-      font-size: 1.1rem; color: #fff;
-      font-weight: 800; letter-spacing: 0.5px;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      font-size: 1.1rem; color: var(--text); font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
     }
-    .header-title .org {
-      font-size: 0.72rem; color: rgba(255,255,255,0.85);
-      letter-spacing: 1.5px; text-transform: uppercase;
-    }
-
     .theme-toggle {
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.4);
-      border-radius: 20px; padding: 6px 14px;
-      color: #fff; font-size: 0.8rem; cursor: pointer;
-      font-weight: 600; transition: all 0.2s;
-      white-space: nowrap;
+      background: var(--glass); backdrop-filter: blur(8px);
+      border: 1px solid var(--glass-b); border-radius: 20px;
+      padding: 6px 16px; color: var(--accent); font-size: 0.8rem;
+      cursor: pointer; font-weight: 600; transition: all 0.2s; white-space: nowrap;
     }
-    .theme-toggle:hover { background: rgba(255,255,255,0.35); }
+    .theme-toggle:hover { background: var(--glass-h); }
 
     .tabs {
       display: flex;
-      background: var(--bg2);
-      border-bottom: 2px solid var(--accent2);
+      background: rgba(15,15,26,0.5);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--glass-b);
     }
     .tab-btn {
       flex: 1; padding: 14px; background: none; border: none;
       color: var(--text3); font-size: 0.95rem; cursor: pointer;
       transition: all 0.2s; border-bottom: 3px solid transparent;
     }
-    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--bg3); font-weight: 700; }
-    .tab-btn:hover:not(.active) { color: var(--accent2); background: var(--bg3); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(124,58,237,0.1); font-weight: 700; }
+    .tab-btn:hover:not(.active) { color: var(--accent); background: rgba(124,58,237,0.06); }
 
     .view { display: none; padding: 24px; max-width: 800px; margin: 0 auto; }
     .view.active { display: block; }
 
     #scanner-container {
       border-radius: 16px; overflow: hidden;
-      border: 3px solid var(--accent2);
+      border: 1px solid var(--glass-b);
       background: #000; max-width: 480px; margin: 0 auto 20px;
-      box-shadow: 0 0 20px rgba(230,126,34,0.3);
+      box-shadow: 0 8px 32px rgba(124,58,237,0.25);
     }
     #reader { width: 100%; }
 
     .scanner-controls { display: flex; gap: 12px; justify-content: center; margin-bottom: 20px; }
 
     .btn {
-      padding: 10px 22px; border-radius: 8px; border: none; cursor: pointer;
+      padding: 10px 22px; border-radius: 10px; border: none; cursor: pointer;
       font-size: 0.9rem; font-weight: 600; transition: all 0.2s;
     }
-    .btn-primary  { background: var(--accent); color: #fff; }
-    .btn-primary:hover  { background: #a93226; }
-    .btn-secondary { background: var(--bg2); color: var(--accent2); border: 1px solid var(--border); }
-    .btn-secondary:hover { background: var(--bg3); }
-    .btn-danger   { background: #7f1d1d; color: #fca5a5; border: 1px solid #dc2626; }
-    .btn-danger:hover   { background: #991b1b; }
+    .btn-primary {
+      background: linear-gradient(135deg, #7c3aed, #4f46e5);
+      color: #fff; box-shadow: 0 4px 15px rgba(124,58,237,0.4);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(124,58,237,0.5); }
+    .btn-secondary {
+      background: var(--glass); backdrop-filter: blur(8px);
+      color: var(--accent); border: 1px solid var(--glass-b);
+    }
+    .btn-secondary:hover { background: var(--glass-h); }
+    .btn-danger {
+      background: rgba(220,38,38,0.15); color: #fca5a5;
+      border: 1px solid rgba(220,38,38,0.3); backdrop-filter: blur(8px);
+    }
+    .btn-danger:hover { background: rgba(220,38,38,0.25); }
 
     #scan-result {
       max-width: 480px; margin: 0 auto; padding: 16px; border-radius: 12px;
       text-align: center; font-size: 1.1rem; font-weight: 600;
-      display: none; animation: fadeIn 0.3s ease;
+      display: none; animation: fadeIn 0.3s ease; backdrop-filter: blur(12px);
     }
-    #scan-result.success { background: #064e3b; color: #6ee7b7; border: 1px solid #059669; }
-    #scan-result.error   { background: #450a0a; color: #fca5a5; border: 1px solid #dc2626; }
-    #scan-result.warning { background: #451a03; color: #fcd34d; border: 1px solid #d97706; }
+    #scan-result.success { background: rgba(6,78,59,0.6);  color: #6ee7b7; border: 1px solid rgba(5,150,105,0.4); }
+    #scan-result.error   { background: rgba(69,10,10,0.6); color: #fca5a5; border: 1px solid rgba(220,38,38,0.4); }
+    #scan-result.warning { background: rgba(69,26,3,0.6);  color: #fcd34d; border: 1px solid rgba(217,119,6,0.4); }
 
     .filters { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-    .filters input {
-      flex: 1; min-width: 180px; padding: 10px 14px;
-      background: var(--bg2); border: 1px solid var(--border);
-      border-radius: 8px; color: var(--text); font-size: 0.9rem;
+    .filters input, .filters select {
+      padding: 10px 14px; background: var(--glass); backdrop-filter: blur(8px);
+      border: 1px solid var(--glass-b); border-radius: 10px;
+      color: var(--text); font-size: 0.9rem; cursor: pointer;
     }
-    .filters input:focus { outline: none; border-color: var(--accent2); }
-    .filters select {
-      padding: 10px 14px; background: var(--bg2); border: 1px solid var(--border);
-      border-radius: 8px; color: var(--text); font-size: 0.9rem; cursor: pointer;
-    }
-    .filters select:focus { outline: none; border-color: var(--accent2); }
+    .filters input { flex: 1; min-width: 180px; cursor: text; }
+    .filters input:focus, .filters select:focus { outline: none; border-color: var(--accent); }
 
     .stats { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
     .stat-card {
-      flex: 1; min-width: 100px; background: var(--bg2); border: 1px solid var(--border);
-      border-radius: 10px; padding: 14px; text-align: center;
-      border-top: 3px solid var(--accent2);
+      flex: 1; min-width: 100px;
+      background: var(--glass); backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-b); border-radius: 12px;
+      padding: 14px; text-align: center;
+      box-shadow: 0 4px 16px rgba(124,58,237,0.1);
     }
     .stat-card .num   { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
     .stat-card .label { font-size: 0.75rem; color: var(--text3); margin-top: 4px; }
 
     .guest-table { width: 100%; border-collapse: collapse; }
     .guest-table th {
-      background: var(--bg2); padding: 12px 14px; text-align: left;
+      background: var(--glass); backdrop-filter: blur(8px);
+      padding: 12px 14px; text-align: left;
       font-size: 0.8rem; color: var(--text3); text-transform: uppercase;
-      letter-spacing: 0.5px; border-bottom: 2px solid var(--accent2);
+      letter-spacing: 0.5px; border-bottom: 1px solid var(--glass-b);
     }
     .guest-table td {
-      padding: 12px 14px; border-bottom: 1px solid var(--border2);
+      padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.04);
       font-size: 0.9rem; vertical-align: middle; color: var(--text);
     }
-    .guest-table tr:hover td { background: var(--bg3); }
+    .guest-table tr:hover td { background: var(--glass-h); }
 
     @media (max-width: 600px) {
       .view { padding: 16px 12px; }
@@ -177,36 +163,33 @@
     }
 
     .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
-    .badge-vip     { background: #78350f; color: #fcd34d; border: 1px solid #f59e0b; }
-    .badge-regular { background: #1e3a5f; color: #93c5fd; }
-    .badge-arrived { background: #064e3b; color: #6ee7b7; }
-    .badge-pending { background: var(--bg2); color: var(--text3); border: 1px solid var(--border); }
+    .badge-vip     { background: rgba(76,29,149,0.5);  color: #c4b5fd; border: 1px solid rgba(167,139,250,0.3); }
+    .badge-regular { background: rgba(30,58,95,0.5);   color: #93c5fd; border: 1px solid rgba(147,197,253,0.2); }
+    .badge-arrived { background: rgba(6,78,59,0.5);    color: #6ee7b7; border: 1px solid rgba(110,231,183,0.2); }
+    .badge-pending { background: var(--glass); color: var(--text3); border: 1px solid var(--glass-b); }
 
-    .btn-mark {
-      padding: 6px 14px; font-size: 0.8rem; border-radius: 6px;
-      border: none; cursor: pointer; font-weight: 600; transition: all 0.2s;
-    }
-    .btn-mark.arrived { background: #064e3b; color: #6ee7b7; cursor: default; }
+    .btn-mark { padding: 6px 14px; font-size: 0.8rem; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
+    .btn-mark.arrived { background: rgba(6,78,59,0.5); color: #6ee7b7; cursor: default; border: 1px solid rgba(110,231,183,0.2); }
 
     .loading { text-align: center; padding: 40px; color: var(--text3); }
     .empty   { text-align: center; padding: 40px; color: var(--text3); }
 
     @keyframes pulse {
-      0%   { box-shadow: 0 0 0 0 rgba(192,57,43,0.7); transform: scale(1); }
-      70%  { box-shadow: 0 0 0 18px rgba(192,57,43,0); transform: scale(1.03); }
-      100% { box-shadow: 0 0 0 0 rgba(192,57,43,0); transform: scale(1); }
+      0%   { box-shadow: 0 0 0 0 rgba(124,58,237,0.7); transform: scale(1); }
+      70%  { box-shadow: 0 0 0 18px rgba(124,58,237,0); transform: scale(1.03); }
+      100% { box-shadow: 0 0 0 0 rgba(124,58,237,0); transform: scale(1); }
     }
     #btn-scan { animation: pulse 1.8s infinite; }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
 
     .manual-entry { max-width: 480px; margin: 0 auto; }
     .manual-entry input {
       width: 100%; padding: 10px 14px; margin-bottom: 10px;
-      background: var(--bg2); border: 1px solid var(--border);
-      border-radius: 8px; color: var(--text); font-size: 0.9rem;
+      background: var(--glass); backdrop-filter: blur(8px);
+      border: 1px solid var(--glass-b); border-radius: 10px;
+      color: var(--text); font-size: 0.9rem;
     }
-    .manual-entry input:focus { outline: none; border-color: var(--accent2); }
+    .manual-entry input:focus { outline: none; border-color: var(--accent); }
     .section-title { font-size: 0.8rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
   </style>
 </head>
@@ -216,7 +199,10 @@
   <div class="header-left">
     <div class="header-title">
       <div class="org">enkishon_oo_africa</div>
-      <h1><img src="/logo.jpg" alt="" onerror="this.style.display='none'" style="height:32px;width:32px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px;border:2px solid rgba(255,255,255,0.4)">Event Guest Scanner</h1>
+      <h1>
+        <img src="/logo.jpg" alt="" onerror="this.style.display='none'" style="height:32px;width:32px;border-radius:50%;object-fit:cover;border:2px solid rgba(167,139,250,0.5)">
+        Event Guest Scanner
+      </h1>
     </div>
   </div>
   <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">Light Mode</button>
@@ -230,9 +216,7 @@
 
 <!-- SCANNER TAB -->
 <div id="view-scanner" class="view active">
-  <div id="scanner-container">
-    <div id="reader"></div>
-  </div>
+  <div id="scanner-container"><div id="reader"></div></div>
   <div class="scanner-controls">
     <button class="btn btn-primary" id="btn-scan" onclick="startScanner()" style="font-size:1.1rem;padding:14px 36px;letter-spacing:1px">&#x1F4F7; Scan QR Code</button>
     <button class="btn btn-danger" id="btn-stop" onclick="stopScanner()" style="display:none;font-size:1.1rem;padding:14px 36px">&#x23F9; Stop Camera</button>
@@ -256,7 +240,7 @@
     <div class="stat-card"><div class="num" id="stat-vip">0</div><div class="label">VIP</div></div>
   </div>
   <div class="filters">
-    <input type="text" id="search-input" placeholder="Search by name or ID..." oninput="renderGuests()" />
+    <input type="text" id="search-input" placeholder="Search by name..." oninput="renderGuests()" />
     <select id="filter-status" onchange="renderGuests()">
       <option value="all">All Status</option>
       <option value="pending">Pending</option>
@@ -269,22 +253,14 @@
     </select>
     <button class="btn btn-secondary" onclick="refreshGuests()">&#x21BB; Refresh</button>
   </div>
-  <div id="guest-list-container">
-    <div class="loading">Loading guests...</div>
-  </div>
+  <div id="guest-list-container"><div class="loading">Loading guests...</div></div>
 </div>
 
-<!-- CONFIG TAB REMOVED -->
-
 <script>
-  let guests = [];
-  let scanner = null;
-  let scanning = false;
-
-  // Auto-detect API base (works locally with vercel dev and on Vercel)
+  let guests = [], scanner = null, scanning = false;
   const API = '';
 
-  // ── Theme toggle ───────────────────────────────────────────
+  // ── Theme ──────────────────────────────────────────────────
   function toggleTheme() {
     const isLight = document.body.classList.toggle('light');
     document.getElementById('theme-btn').textContent = isLight ? 'Dark Mode' : 'Light Mode';
@@ -295,7 +271,7 @@
     document.getElementById('theme-btn').textContent = 'Dark Mode';
   }
 
-  // ── Tab switching ──────────────────────────────────────────
+  // ── Tabs ───────────────────────────────────────────────────
   function switchTab(tab) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -312,8 +288,7 @@
     scanner.start(
       { facingMode: 'environment' },
       { fps: 10, qrbox: { width: 250, height: 250 } },
-      onScanSuccess,
-      () => {}
+      onScanSuccess, () => {}
     ).then(() => {
       scanning = true;
       document.getElementById('btn-scan').style.display = 'none';
@@ -322,62 +297,43 @@
   }
 
   function stopScanner() {
-    if (scanner && scanning) {
-      scanner.stop().then(() => { scanner.clear(); scanning = false; });
-    }
+    if (scanner && scanning) scanner.stop().then(() => { scanner.clear(); scanning = false; });
     document.getElementById('btn-scan').style.display = 'inline-block';
     document.getElementById('btn-stop').style.display = 'none';
   }
 
-  function onScanSuccess(code) {
-    stopScanner();
-    checkIn({ token: code.trim() });
-  }
+  function onScanSuccess(code) { stopScanner(); checkIn({ token: code.trim() }); }
 
   function manualCheck() {
     const val = document.getElementById('manual-input').value.trim().toUpperCase();
     if (!val) return;
     if (val.length !== 7) { showResult('Enter the 7-character code from the ticket', 'error'); return; }
-    // Look up guest by code
     const match = guests.find(g => (g.code || '').toUpperCase() === val);
     if (!match) { showResult('Code not found: ' + val, 'error'); return; }
     showConfirm(match);
   }
 
-  // ── Confirmation modal for manual check-in ─────────────────
+  // ── Confirm modal ──────────────────────────────────────────
   function showConfirm(guest) {
     const existing = document.getElementById('confirm-modal');
     if (existing) existing.remove();
-
     const modal = document.createElement('div');
     modal.id = 'confirm-modal';
-    modal.style.cssText = `
-      position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;
-      align-items:center;justify-content:center;z-index:1000;animation:fadeIn 0.2s ease;
-    `;
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:1000;animation:fadeIn 0.2s ease;';
     modal.innerHTML = `
-      <div style="background:#1a1a2e;border:1px solid #3b3b6b;border-radius:16px;padding:28px;max-width:360px;width:90%;text-align:center;">
-        <div style="font-size:2rem;margin-bottom:10px;">⚠️</div>
+      <div style="background:rgba(26,26,46,0.95);backdrop-filter:blur(20px);border:1px solid rgba(167,139,250,0.3);border-radius:16px;padding:28px;max-width:360px;width:90%;text-align:center;">
+        <div style="font-size:1.8rem;margin-bottom:10px;">⚠️</div>
         <div style="color:#fcd34d;font-size:1rem;font-weight:700;margin-bottom:6px;">Manual Check-In</div>
         <div style="color:#e0e0e0;font-size:1.1rem;font-weight:600;margin-bottom:4px;">${esc(guest.name)}</div>
-        <div style="color:#6b7280;font-size:0.85rem;margin-bottom:20px;">
-          ${guest.type === 'vip' ? '<span style="color:#c4b5fd">⭐ VIP</span>' : 'Regular'} &nbsp;|&nbsp; ID: ${esc(guest.id)}
-        </div>
-        <div style="color:#9ca3af;font-size:0.8rem;margin-bottom:20px;">
-          You are manually checking in this guest.<br>This action will be recorded with the current time.
-        </div>
+        <div style="color:#6b7280;font-size:0.85rem;margin-bottom:20px;">${guest.type==='vip'?'<span style="color:#c4b5fd">⭐ VIP</span>':'Regular'}</div>
+        <div style="color:#9ca3af;font-size:0.8rem;margin-bottom:20px;">You are manually checking in this guest.<br>This will be recorded with the current time.</div>
         <div style="display:flex;gap:10px;justify-content:center;">
           <button onclick="document.getElementById('confirm-modal').remove();document.getElementById('manual-input').value='';"
-            style="padding:10px 22px;border-radius:8px;border:1px solid #3b3b6b;background:#1e1e3a;color:#a78bfa;font-weight:600;cursor:pointer;">
-            Cancel
-          </button>
+            style="padding:10px 22px;border-radius:8px;border:1px solid rgba(167,139,250,0.3);background:rgba(255,255,255,0.05);color:#a78bfa;font-weight:600;cursor:pointer;">Cancel</button>
           <button onclick="confirmManualCheckIn('${esc(guest.id)}')"
-            style="padding:10px 22px;border-radius:8px;border:none;background:#d97706;color:#fff;font-weight:600;cursor:pointer;">
-            Confirm Check-In
-          </button>
+            style="padding:10px 22px;border-radius:8px;border:none;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-weight:600;cursor:pointer;">Confirm</button>
         </div>
-      </div>
-    `;
+      </div>`;
     document.body.appendChild(modal);
   }
 
@@ -387,79 +343,58 @@
     await checkIn({ code: guests.find(g => g.id === id)?.code }, true);
   }
 
-  // ── Check-in logic ─────────────────────────────────────────
+  // ── Check-in ───────────────────────────────────────────────
   async function checkIn(payload, isManual = false) {
     if (!payload) return;
     try {
       const res = await fetch(API + '/api/checkin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...payload, manual: isManual }),
       });
       const data = await res.json();
       if (!res.ok) { showResult(data.error || 'Error', 'error'); return; }
-
       if (data.status === 'already_checked_in') {
-        showResult('⚠️ Already checked in: ' + data.guest.name + ' at ' + formatTime(data.guest.arrived_at), 'warning');
+        showResult('Already checked in: ' + data.guest.name + ' at ' + formatTime(data.guest.arrived_at), 'warning');
       } else if (isManual) {
-        showResult('✓ Manual check-in: ' + data.guest.name + (data.guest.type === 'vip' ? ' ⭐ VIP' : ''), 'warning');
+        showResult('Manual check-in: ' + data.guest.name + (data.guest.type === 'vip' ? ' ⭐ VIP' : ''), 'warning');
       } else {
-        showResult('✓ Welcome, ' + data.guest.name + (data.guest.type === 'vip' ? ' ⭐ VIP' : '') + '!', 'success');
+        showResult('Welcome, ' + data.guest.name + (data.guest.type === 'vip' ? ' ⭐ VIP' : '') + '!', 'success');
       }
-      await loadGuests();
-      updateStats();
+      await loadGuests(); updateStats();
       if (document.getElementById('view-guests').classList.contains('active')) renderGuests();
-    } catch (err) {
-      showResult('Network error', 'error');
-    }
+    } catch (err) { showResult('Network error', 'error'); }
   }
 
-  function formatTime(ts) {
-    if (!ts) return '—';
-    return new Date(ts).toLocaleTimeString();
-  }
+  function formatTime(ts) { return ts ? new Date(ts).toLocaleTimeString() : '—'; }
 
   function showResult(msg, type) {
     const el = document.getElementById('scan-result');
-    el.textContent = msg;
-    el.className = type;
-    el.style.display = 'block';
+    el.textContent = msg; el.className = type; el.style.display = 'block';
     clearTimeout(el._t);
     el._t = setTimeout(() => { el.style.display = 'none'; }, 4000);
   }
 
-  // ── Guest list rendering ───────────────────────────────────
+  // ── Guest list ─────────────────────────────────────────────
   function renderGuests() {
     const search = document.getElementById('search-input').value.toLowerCase();
     const status = document.getElementById('filter-status').value;
     const type   = document.getElementById('filter-type').value;
-
-    let filtered = guests.filter(g => {
-      const matchSearch = g.name.toLowerCase().includes(search);
-      const matchStatus = status === 'all' || (status === 'arrived' ? g.arrived : !g.arrived);
-      const matchType   = type === 'all' || g.type === type;
-      return matchSearch && matchStatus && matchType;
+    const filtered = guests.filter(g => {
+      return g.name.toLowerCase().includes(search)
+        && (status === 'all' || (status === 'arrived' ? g.arrived : !g.arrived))
+        && (type === 'all' || g.type === type);
     });
-
     const container = document.getElementById('guest-list-container');
-    if (!filtered.length) {
-      container.innerHTML = '<div class="empty">No guests match your filters.</div>';
-      return;
-    }
-
-    let html = '<table class="guest-table"><thead><tr>'
-      + '<th>Name</th><th>Type</th><th>Status</th><th class="col-time">Time</th>'
-      + '</tr></thead><tbody>';
-
+    if (!filtered.length) { container.innerHTML = '<div class="empty">No guests match your filters.</div>'; return; }
+    let html = '<table class="guest-table"><thead><tr><th>Name</th><th>Type</th><th>Status</th><th>Time</th></tr></thead><tbody>';
     filtered.forEach(g => {
       html += `<tr>
         <td>${esc(g.name)}</td>
         <td><span class="badge badge-${g.type}">${g.type.toUpperCase()}</span></td>
         <td><span class="badge ${g.arrived ? 'badge-arrived' : 'badge-pending'}">${g.arrived ? 'Arrived' : 'Pending'}</span></td>
-        <td class="col-time" style="color:#6b7280;font-size:0.8rem">${formatTime(g.arrived_at)}</td>
+        <td style="color:var(--text3);font-size:0.8rem">${formatTime(g.arrived_at)}</td>
       </tr>`;
     });
-
     html += '</tbody></table>';
     container.innerHTML = html;
   }
@@ -473,21 +408,15 @@
 
   async function refreshGuests() {
     document.getElementById('guest-list-container').innerHTML = '<div class="loading">Refreshing...</div>';
-    await loadGuests();
-    updateStats();
-    renderGuests();
+    await loadGuests(); updateStats(); renderGuests();
   }
 
-  // ── Persistence ────────────────────────────────────────────
   async function loadGuests() {
     try {
       const res = await fetch(API + '/api/guests');
       const data = await res.json();
       guests = Array.isArray(data) ? data : [];
-    } catch (err) {
-      console.error('Could not load guests', err);
-      guests = [];
-    }
+    } catch (err) { guests = []; }
   }
 
   function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -496,4 +425,3 @@
 </script>
 </body>
 </html>
-
