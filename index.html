@@ -361,7 +361,7 @@
     }
 
     let html = '<table class="guest-table"><thead><tr>'
-      + '<th>Name</th><th>Type</th><th>Status</th><th class="col-time">Time</th><th>Action</th>'
+      + '<th>Name</th><th>Type</th><th>Status</th><th class="col-time">Time</th>'
       + '</tr></thead><tbody>';
 
     filtered.forEach(g => {
@@ -370,10 +370,6 @@
         <td><span class="badge badge-${g.type}">${g.type.toUpperCase()}</span></td>
         <td><span class="badge ${g.arrived ? 'badge-arrived' : 'badge-pending'}">${g.arrived ? 'Arrived' : 'Pending'}</span></td>
         <td class="col-time" style="color:#6b7280;font-size:0.8rem">${formatTime(g.arrived_at)}</td>
-        <td>${g.arrived
-          ? `<button class="btn-mark arrived">&#x2713; In</button>`
-          : `<button class="btn-mark pending" onclick="showConfirm(guests.find(x=>x.id==='${esc(g.id)}'))">Check In</button>`
-        }</td>
       </tr>`;
     });
 
