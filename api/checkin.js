@@ -12,7 +12,7 @@ module.exports = async (req, res) => {
 
   try {
     const pool = getPool();
-    const [rows] = await pool.query('SELECT * FROM guests WHERE id = ?', [id]);
+    const { rows } = await pool.query('SELECT * FROM guests WHERE id = $1', [id]);
     if (!rows.length) return res.status(404).json({ error: 'Guest not found' });
 
     const guest = rows[0];
@@ -21,7 +21,7 @@ module.exports = async (req, res) => {
     }
 
     await pool.query(
-      'UPDATE guests SET arrived = 1, arrived_at = NOW() WHERE id = ?',
+      'UPDATE guests SET arrived = true, arrived_at = NOW() WHERE id = $1',
       [id]
     );
     guest.arrived = true;
