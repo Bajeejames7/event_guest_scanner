@@ -114,20 +114,6 @@
     .loading { text-align: center; padding: 40px; color: #6b7280; }
     .empty   { text-align: center; padding: 40px; color: #6b7280; }
 
-    .config-form { max-width: 500px; }
-    .form-group { margin-bottom: 18px; }
-    .form-group label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: #9ca3af; }
-    .form-group input, .form-group textarea {
-      width: 100%; padding: 10px 14px;
-      background: #1a1a2e; border: 1px solid #2a2a4a;
-      border-radius: 8px; color: #e0e0e0; font-size: 0.9rem;
-    }
-    .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #7c3aed; }
-    .form-group textarea { resize: vertical; min-height: 120px; font-family: monospace; font-size: 0.8rem; }
-    .form-hint { font-size: 0.75rem; color: #6b7280; margin-top: 4px; }
-
-    .import-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
-
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 
     .scan-icon { font-size: 3rem; margin-bottom: 12px; }
@@ -151,8 +137,7 @@
 
 <div class="tabs">
   <button class="tab-btn active" onclick="switchTab('scanner')">&#x1F4F7; Scanner</button>
-  <button class="tab-btn" onclick="switchTab('guests')">&#x1F465; Guests</button>
-  <button class="tab-btn" onclick="switchTab('config')">&#x2699;&#xFE0F; Config</button>
+  <button class="tab-btn" onclick="switchTab('guests')">&#x1F465; Guest List</button>
 </div>
 
 <!-- SCANNER TAB -->
@@ -183,7 +168,7 @@
     <div class="stat-card"><div class="num" id="stat-vip">0</div><div class="label">VIP</div></div>
   </div>
   <div class="filters">
-    <input type="text" id="search-input" placeholder="Search guests..." oninput="renderGuests()" />
+    <input type="text" id="search-input" placeholder="Search by name or ID..." oninput="renderGuests()" />
     <select id="filter-status" onchange="renderGuests()">
       <option value="all">All Status</option>
       <option value="pending">Pending</option>
@@ -194,32 +179,14 @@
       <option value="vip">VIP</option>
       <option value="regular">Regular</option>
     </select>
+    <button class="btn btn-secondary" onclick="refreshGuests()">&#x21BB; Refresh</button>
   </div>
   <div id="guest-list-container">
-    <div class="empty">No guests loaded. Add guests in the Config tab.</div>
+    <div class="loading">Loading guests...</div>
   </div>
 </div>
 
-<!-- CONFIG TAB -->
-<div id="view-config" class="view">
-  <div class="config-form">
-    <div class="form-group">
-      <label>Event Name</label>
-      <input type="text" id="cfg-event-name" placeholder="e.g. Annual Gala 2026" />
-    </div>
-    <div class="form-group">
-      <label>Guest List (CSV or JSON)</label>
-      <textarea id="cfg-guest-data" placeholder='CSV: id,name,type&#10;1,Alice Smith,vip&#10;2,Bob Jones,regular&#10;&#10;JSON: [{"id":"1","name":"Alice","type":"vip"}]'></textarea>
-      <p class="form-hint">CSV columns: id, name, type (vip/regular). JSON array with same fields.</p>
-    </div>
-    <div class="import-actions">
-      <button class="btn btn-primary" onclick="saveConfig()">Save &amp; Import</button>
-      <button class="btn btn-secondary" onclick="loadSample()">Load Sample Data</button>
-      <button class="btn btn-danger" onclick="clearAll()">Clear All</button>
-    </div>
-    <p id="cfg-msg" style="margin-top:14px;font-size:0.85rem;color:#6ee7b7;display:none"></p>
-  </div>
-</div>
+<!-- CONFIG TAB REMOVED -->
 
 <script>
   let guests = [];
@@ -418,55 +385,11 @@
     document.getElementById('stat-vip').textContent     = guests.filter(g => g.type === 'vip').length;
   }
 
-  // ── Config ─────────────────────────────────────────────────
-  function saveConfig() {
-    const name = document.getElementById('cfg-event-name').value.trim();
-    if (name) {
-      document.getElementById('event-name-display').textContent = name;
-      localStorage.setItem('eventName', name);
-    }
-    showCfgMsg('Event name saved. To add guests, edit scripts/generate-qr.js and api/seed.js then run the seed endpoint.');
-  }
-
-  function parseGuestData(raw) {
-    if (raw.startsWith('[') || raw.startsWith('{')) {
-      const arr = JSON.parse(raw);
-      return arr.map(r => ({ id: String(r.id), name: r.name, type: (r.type||'regular').toLowerCase(), arrived: false }));
-    }
-    // CSV
-    const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
-    const start = lines[0].toLowerCase().startsWith('id') ? 1 : 0;
-    return lines.slice(start).map((line, i) => {
-      const [id, name, type] = line.split(',').map(s => s.trim());
-      return { id: id || String(i+1), name: name || 'Guest ' + (i+1), type: (type||'regular').toLowerCase(), arrived: false };
-    });
-  }
-
-  function loadSample() {
-    document.getElementById('cfg-event-name').value = 'Annual Gala 2026';
-    document.getElementById('cfg-guest-data').value =
-      'id,name,type\n1,Alice Smith,vip\n2,Bob Jones,regular\n3,Carol White,vip\n4,David Brown,regular\n5,Eva Green,regular';
-  }
-
-  function clearAll() {
-    if (!confirm('Clear all guest data?')) return;
-    guests = [];
-    localStorage.removeItem('guests');
-    localStorage.removeItem('eventName');
-    document.getElementById('event-name-display').textContent = 'No event loaded';
-    document.getElementById('cfg-event-name').value = '';
-    document.getElementById('cfg-guest-data').value = '';
+  async function refreshGuests() {
+    document.getElementById('guest-list-container').innerHTML = '<div class="loading">Refreshing...</div>';
+    await loadGuests();
     updateStats();
     renderGuests();
-    showCfgMsg('Cleared.');
-  }
-
-  function showCfgMsg(msg, err) {
-    const el = document.getElementById('cfg-msg');
-    el.textContent = msg;
-    el.style.color = err ? '#fca5a5' : '#6ee7b7';
-    el.style.display = 'block';
-    setTimeout(() => el.style.display = 'none', 3000);
   }
 
   // ── Persistence ────────────────────────────────────────────
